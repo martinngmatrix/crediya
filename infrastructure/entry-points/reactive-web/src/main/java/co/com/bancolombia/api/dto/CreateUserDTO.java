@@ -28,5 +28,8 @@ public record CreateUserDTO(
         @NotNull(message = "El salario base es obligatorio")
         @DecimalMin(value = "0.0", inclusive = true, message = "El salario base no puede ser menor que 0")
         @DecimalMax(value = "15000000.0", inclusive = true, message = "El salario base no puede ser mayor que 15,000,000")
-        BigDecimal baseSalary
+        BigDecimal baseSalary,
+
+        @NotBlank(message = "El numero de documento no puede ser nulo ni vacío")
+        String documentNumber
 ) {}

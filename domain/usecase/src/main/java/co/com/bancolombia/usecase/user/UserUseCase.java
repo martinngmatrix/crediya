@@ -10,6 +10,8 @@ public class UserUseCase {
     private final UserRepository userRepository;
 
     public Mono<Void> createUser(User user) {
-        return userRepository.createUser(user);
+        return userRepository.findByEmail(user.getEmail())
+                .flatMap(existingUser -> Mono.<Void>error(new IllegalArgumentException("Correo ya registrado")))
+                .switchIfEmpty(userRepository.createUser(user));
     }
 }

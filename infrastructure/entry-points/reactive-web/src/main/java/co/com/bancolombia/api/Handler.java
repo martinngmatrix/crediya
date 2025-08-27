@@ -2,6 +2,8 @@ package co.com.bancolombia.api;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,9 @@ private static final Logger log = LoggerFactory.getLogger(Handler.class);
                 .map(mapper::toModel)
                 .flatMap(userUseCase::createUser)
                 .doOnSuccess(user -> log.info("Usuario creado con exito"))
-                .flatMap(user -> ServerResponse.ok().bodyValue(user))
+                .then(ServerResponse.ok().bodyValue(
+                    Map.of("message", "Usuario creado con exito")
+                ))
                 .onErrorResume(e -> {
                     ErrorResponse error = new ErrorResponse(
                             e.getMessage() != null ? e.getMessage() : "Error inesperado",

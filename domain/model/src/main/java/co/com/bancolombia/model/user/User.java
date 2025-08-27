@@ -2,6 +2,7 @@ package co.com.bancolombia.model.user;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class User {
+    private BigInteger id;
     private String name;
     private String lastName;
     private LocalDate dateOfBirth;
@@ -23,4 +25,5 @@ public class User {
     private String email;
     private String phone;
     private BigDecimal baseSalary;
+    private String documentNumber;
 }

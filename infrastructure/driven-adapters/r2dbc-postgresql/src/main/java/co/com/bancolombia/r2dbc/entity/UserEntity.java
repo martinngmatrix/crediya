@@ -43,4 +43,7 @@ public class UserEntity {
 
     @Column("base_salary")
     private BigDecimal baseSalary;
+
+    @Column("document_number")
+    private String documentNumber; 
 }
