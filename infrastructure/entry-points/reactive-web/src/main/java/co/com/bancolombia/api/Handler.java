@@ -2,14 +2,15 @@ package co.com.bancolombia.api;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+import co.com.bancolombia.api.constants.Constants;
+import co.com.bancolombia.api.constants.messages.ApiResponseMessages;
 import co.com.bancolombia.api.dto.CreateUserDTO;
 import co.com.bancolombia.api.dto.ErrorResponse;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
@@ -21,27 +22,25 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class Handler {
 private  final UserUseCase userUseCase;
-private final UserDTOMapper mapper;
+private final UserDTOMapper userMapper;
 private final ValidationService validationService;
 private static final Logger log = LoggerFactory.getLogger(Handler.class);
-//private  final UseCase2 useCase2;
 
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
-        log.trace("Inicio del proceso de creación de usuario");
+        log.trace(ApiResponseMessages.CREATE_USER_REQUEST_RECEIVED);
         return serverRequest.bodyToMono(CreateUserDTO.class)
                 .flatMap(validationService::validate)
-                .map(mapper::toModel)
+                .map(userMapper::toModel)
                 .flatMap(userUseCase::createUser)
-                .doOnSuccess(user -> log.info("Usuario creado con exito"))
-                .then(ServerResponse.ok().bodyValue(
-                    Map.of("message", "Usuario creado con exito")
-                ))
+                .doOnSuccess(user -> log.info(ApiResponseMessages.USER_CREATED))
+                .then(ServerResponse
+                .status(HttpStatus.CREATED)
+                .build())
                 .onErrorResume(e -> {
                     ErrorResponse error = new ErrorResponse(
-                            e.getMessage() != null ? e.getMessage() : "Error inesperado",
-                            400
+                            e.getMessage() != null ? e.getMessage() : Constants.UNEXPECTED_ERROR
                     );
                     return ServerResponse.status(400).bodyValue(error);
                 });
-    } 
+    }
 }

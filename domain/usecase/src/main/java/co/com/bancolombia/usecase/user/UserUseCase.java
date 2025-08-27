@@ -1,6 +1,7 @@
 package co.com.bancolombia.usecase.user;
 
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.constants.messages.UserErrorMessages;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -11,7 +12,7 @@ public class UserUseCase {
 
     public Mono<Void> createUser(User user) {
         return userRepository.findByEmail(user.getEmail())
-                .flatMap(existingUser -> Mono.<Void>error(new IllegalArgumentException("Correo ya registrado")))
+                .flatMap(existingUser -> Mono.<Void>error(new IllegalArgumentException(UserErrorMessages.EMAIL_ALREADY_EXISTS)))
                 .switchIfEmpty(userRepository.createUser(user));
     }
 }

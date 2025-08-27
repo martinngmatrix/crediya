@@ -85,4 +85,46 @@ public class UserRepositoryTest {
 
         verify(userRepository, times(1)).findByEmail("noexiste@example.com");
     }
+
+    @Test
+    void testFindByDocumentNumberFound() {
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+
+        User expectedUser = User.builder()
+                .name("Carlos")
+                .lastName("Ramirez")
+                .dateOfBirth(LocalDate.of(1992, 3, 10))
+                .address("Jr. Los Olivos 321")
+                .email("carlos@example.com")
+                .phone("111222333")
+                .baseSalary(BigDecimal.valueOf(3500))
+                .documentNumber("11223344")
+                .build();
+
+        when(userRepository.findByDocumentNumber(eq("11223344")))
+                .thenReturn(Mono.just(expectedUser));
+
+        Mono<User> result = userRepository.findByDocumentNumber("11223344");
+
+        StepVerifier.create(result)
+                .expectNext(expectedUser)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByDocumentNumber("11223344");
+    }
+
+    @Test
+    void testFindByDocumentNumberNotFound() {
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+
+        when(userRepository.findByDocumentNumber(eq("00000000")))
+                .thenReturn(Mono.empty());
+
+        Mono<User> result = userRepository.findByDocumentNumber("00000000");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByDocumentNumber("00000000");
+    }
 }

@@ -64,7 +64,7 @@ class RouterRestTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isCreated();
     }
 
     @Test
@@ -89,7 +89,6 @@ class RouterRestTest {
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("El nombre no puede estar vacío")
-                .jsonPath("$.status").isEqualTo(400);
+                .jsonPath("$.message").isEqualTo("El nombre no puede estar vacío");
     }
 }
