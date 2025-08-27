@@ -52,12 +52,28 @@ subprojects {
 
 
     jacocoTestReport {
-        dependsOn test, 'pitest'
+        dependsOn test
+        if (project.tasks.findByName("pitest") != null) {
+            dependsOn "pitest"
+        }
         reports {
             xml.setRequired true
             xml.setOutputLocation layout.buildDirectory.file("reports/jacoco.xml")
             csv.setRequired false
             html.setOutputLocation layout.buildDirectory.dir("reports/jacocoHtml")
+        }
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                    '**/MainApplication.*',
+                    '**/config/**',
+                    '**/mapper/**',
+                    '**/validation/**',
+                    '**/*Config.*',
+                    '**/*DTO.*',
+                    '**/*Exception.*'
+                ])
+            }))
         }
     }
 
