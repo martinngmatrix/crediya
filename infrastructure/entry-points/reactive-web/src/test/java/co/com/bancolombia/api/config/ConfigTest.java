@@ -2,8 +2,11 @@ package co.com.bancolombia.api.config;
 
 import co.com.bancolombia.api.Handler;
 import co.com.bancolombia.api.RouterRest;
+import co.com.bancolombia.api.mapper.LoanApplicationDTOMapper;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
 import co.com.bancolombia.api.validation.ValidationService;
+import co.com.bancolombia.model.loans.Loan;
+import co.com.bancolombia.usecase.loanapplication.LoanApplicationUseCase;
 import co.com.bancolombia.usecase.user.UserUseCase;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +29,13 @@ class ConfigTest {
     private UserUseCase userUseCase;
 
     @MockitoBean
+    private LoanApplicationUseCase loanApplicationUseCase;
+
+    @MockitoBean
     private UserDTOMapper mapper;
+
+    @MockitoBean
+    private LoanApplicationDTOMapper loanApplicationMapper;
 
     @MockitoBean
     private ValidationService validationService;

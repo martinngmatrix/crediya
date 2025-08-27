@@ -1,13 +1,18 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.dto.CreateLoanApplicationDTO;
 import co.com.bancolombia.api.dto.CreateUserDTO;
+import co.com.bancolombia.api.mapper.LoanApplicationDTOMapper;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
 import co.com.bancolombia.api.validation.ValidationService;
+import co.com.bancolombia.model.loanapplication.LoanApplication;
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.usecase.loanapplication.LoanApplicationUseCase;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -33,7 +38,13 @@ class RouterRestTest {
     private UserUseCase userUseCase;
 
     @MockitoBean
+    private LoanApplicationUseCase loanApplicationUseCase;
+
+    @MockitoBean
     private UserDTOMapper mapper;
+
+    @MockitoBean
+    private LoanApplicationDTOMapper loanApplicationMapper;
 
     @MockitoBean
     private ValidationService validationService;
@@ -90,6 +101,60 @@ class RouterRestTest {
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("El nombre no puede estar vacío")
+                .jsonPath("$.status").isEqualTo(400);
+    }
+
+    @Test
+    void testCreateLoanApplication() {
+        CreateLoanApplicationDTO request = new CreateLoanApplicationDTO(
+                "987654321",
+                BigDecimal.valueOf(1500),
+                12,
+                "Personal"
+        );
+
+        LoanApplication loanApplication = LoanApplication.builder()
+                .id(BigInteger.ONE)
+                .userId(BigInteger.TEN)
+                .amount(BigDecimal.valueOf(1500))
+                .term(12)
+                .loanId(BigInteger.valueOf(1))
+                .build();
+
+        when(validationService.validate(any(CreateLoanApplicationDTO.class))).thenReturn(Mono.just(request));
+        when(loanApplicationMapper.toModel(any(CreateLoanApplicationDTO.class))).thenReturn(loanApplication);
+        when(loanApplicationUseCase.createLoanApplication(any(LoanApplication.class), anyString(), anyString()))
+                .thenReturn(Mono.empty());
+
+        webTestClient.post()
+                .uri("/api/v1/solicitud")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void testCreateLoanApplicationValidationError() {
+        CreateLoanApplicationDTO request = new CreateLoanApplicationDTO(
+                "",
+                BigDecimal.valueOf(1500),
+                12,
+                "Personal"
+        );
+
+        when(validationService.validate(any(CreateLoanApplicationDTO.class)))
+                .thenReturn(Mono.error(new IllegalArgumentException("El número de documento no puede estar vacío")));
+
+        webTestClient.post()
+                .uri("/api/v1/solicitud")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("El número de documento no puede estar vacío")
                 .jsonPath("$.status").isEqualTo(400);
     }
 }
