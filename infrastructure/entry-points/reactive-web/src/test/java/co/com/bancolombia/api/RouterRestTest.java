@@ -49,10 +49,12 @@ class RouterRestTest {
                 "Calle 123",
                 "999999999",
                 BigDecimal.valueOf(5000),
-                "123456789"
+                "123456789",
+                "password123",
+                "role"
         );
 
-        User user = new User(new BigInteger("1"), "Juan", "Pérez", null, "juan@test.com", null, null, BigDecimal.valueOf(5000), "123456789");
+        User user = new User(new BigInteger("1"), "Juan", "Pérez", null, "juan@test.com", null, null, BigDecimal.valueOf(5000), "123456789", "password123", "role");
 
         when(validationService.validate(any(CreateUserDTO.class))).thenReturn(Mono.just(request));
         when(mapper.toModel(any(CreateUserDTO.class))).thenReturn(user);
@@ -77,7 +79,9 @@ class RouterRestTest {
                 "Calle 123",
                 "999999999",
                 BigDecimal.valueOf(5000),
-                "123456789"
+                "123456789",
+                "password123", 
+                "role"
         );
         when(validationService.validate(any(CreateUserDTO.class)))
                 .thenReturn(Mono.error(new IllegalArgumentException("El nombre no puede estar vacío")));

@@ -46,4 +46,10 @@ public class UserEntity {
 
     @Column("document_number")
     private String documentNumber; 
+
+    @Column("password")
+    private String password;
+
+    @Column("role")
+    private String role;
 }

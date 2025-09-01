@@ -41,9 +41,35 @@ public class RouterRest {
                         schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = co.com.bancolombia.api.dto.ErrorResponse.class)
                     )),
                 }
-        ))
+        )),
+        @RouterOperation(
+            path = "/api/v1/login",
+            beanClass = Handler.class,
+            beanMethod = "authenticate",
+            method = RequestMethod.POST,
+            operation = @Operation(
+                operationId = "authenticate",
+                tags = {"User"},
+                summary = "Login a user",
+                description = "Authenticates a user and returns a token",
+                requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "User credentials",
+                    required = true,
+                    content = @io.swagger.v3.oas.annotations.media.Content(
+                        schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = co.com.bancolombia.api.dto.LoginUserDTO.class)
+                    )
+                ),
+                responses = {
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User authenticated successfully"),
+                    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Authentication failed", content = @io.swagger.v3.oas.annotations.media.Content(
+                        mediaType = "application/json",
+                        schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = co.com.bancolombia.api.dto.ErrorResponse.class)
+                    ))
+                }
+        ))        
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::createUser);
+        return route(POST("/api/v1/usuarios"), handler::createUser).
+                andRoute(POST("/api/v1/login"), handler::authenticate);
     }
 }

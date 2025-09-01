@@ -31,5 +31,11 @@ public record CreateUserDTO(
         BigDecimal baseSalary,
 
         @NotBlank(message = "El numero de documento no puede ser nulo ni vacío")
-        String documentNumber
+        String documentNumber,
+        
+        @NotBlank(message = "La contraseña no puede ser nula ni vacía")
+        String password,
+
+        @NotBlank(message = "El rol no puede ser nulo ni vacío")
+        String role
 ) {}

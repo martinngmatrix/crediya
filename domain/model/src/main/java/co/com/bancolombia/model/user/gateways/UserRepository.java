@@ -7,4 +7,5 @@ public interface UserRepository {
     Mono<Void> createUser(User user);
     Mono<User> findByEmail(String email);
     Mono<User> findByDocumentNumber(String documentNumber);
+    Mono<User> findByEmailAndPassword(String email, String password);
 }

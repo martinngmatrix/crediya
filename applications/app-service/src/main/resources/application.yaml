@@ -29,3 +29,6 @@ adapters.r2dbc:
   schema: public
   username: postgres
   password: postgres
+jwt:
+  secret: u1FZ7xZkdlp7uPqFz3ME7J8Qz3YOXkU0jU6aWw+4/9uQ4dFw6Nw5Y8JtdfG2L/zzU7fNHbZx4fM=
+  expiration: 3600

@@ -46,7 +46,9 @@ public class UserTest {
                 "ana@example.com",
                 "987654321",
                 salary,
-                "123456789"
+                "123456789",
+                null,
+                "role"
         );
 
         assertEquals("Ana", user.getName());

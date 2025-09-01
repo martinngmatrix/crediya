@@ -127,4 +127,46 @@ public class UserRepositoryTest {
 
         verify(userRepository, times(1)).findByDocumentNumber("00000000");
     }
+    
+    @Test
+    void testFindByEmailAndPasswordFound() {
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+
+        User expectedUser = User.builder()
+                .name("Luis")
+                .lastName("Fernandez")
+                .dateOfBirth(LocalDate.of(1995, 7, 20))
+                .address("Av. Libertad 456")
+                .email("luis@example.com")
+                .phone("555666777")
+                .baseSalary(BigDecimal.valueOf(4200))
+                .documentNumber("55667788")
+                .build();
+
+        when(userRepository.findByEmailAndPassword(eq("luis@example.com"), eq("password123")))
+                .thenReturn(Mono.just(expectedUser));
+
+        Mono<User> result = userRepository.findByEmailAndPassword("luis@example.com", "password123");
+
+        StepVerifier.create(result)
+                .expectNext(expectedUser)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByEmailAndPassword("luis@example.com", "password123");
+    }
+
+    @Test
+    void testFindByEmailAndPasswordNotFound() {
+        UserRepository userRepository = Mockito.mock(UserRepository.class);
+
+        when(userRepository.findByEmailAndPassword(eq("wrong@example.com"), eq("wrongpass")))
+                .thenReturn(Mono.empty());
+
+        Mono<User> result = userRepository.findByEmailAndPassword("wrong@example.com", "wrongpass");
+
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByEmailAndPassword("wrong@example.com", "wrongpass");
+    }
 }

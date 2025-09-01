@@ -14,8 +14,15 @@ public class UserErrorMessagesTest {
     }
 
     @Test
+    void shouldHaveCorrectCredentialsMessage() {
+        assertEquals("Credenciales inválidas", UserErrorMessages.INVALID_CREDENTIALS);
+    }
+
+    @Test
     void constantShouldNotBeNullOrEmpty() {
         assertNotNull(UserErrorMessages.EMAIL_ALREADY_EXISTS);
+        assertNotNull(UserErrorMessages.INVALID_CREDENTIALS);
         assertFalse(UserErrorMessages.EMAIL_ALREADY_EXISTS.isEmpty());
+        assertFalse(UserErrorMessages.INVALID_CREDENTIALS.isEmpty());
     }
 }

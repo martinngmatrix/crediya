@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.model.user.gateways.JwtService;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -22,7 +23,10 @@ public class UserUseCaseTest {
     
     @Mock
     private UserRepository userRepository;
-    
+
+    @Mock
+    private JwtService jwtService;    
+
     @InjectMocks
     private UserUseCase userUseCase;
     
@@ -80,6 +84,43 @@ public class UserUseCaseTest {
 
         verify(userRepository, times(1)).findByEmail(user.getEmail());
         verify(userRepository, times(1)).createUser(user);
+    }
+
+    @Test
+    void authenticateShouldReturnTokenWhenCredentialsAreValid() {
+        String email = "test@example.com";
+        String password = "password123";
+        String expectedToken = "jwt-token";
+
+        when(userRepository.findByEmailAndPassword(email, password)).thenReturn(Mono.just(user));
+        when(jwtService.generateToken(user)).thenReturn(expectedToken);
+
+        Mono<String> result = userUseCase.authenticate(email, password);
+
+        StepVerifier.create(result)
+                .expectNext(expectedToken)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByEmailAndPassword(email, password);
+        verify(jwtService, times(1)).generateToken(user);
+    }
+
+    @Test
+    void authenticateShouldThrowExceptionWhenCredentialsAreInvalid() {
+        String email = "wrong@example.com";
+        String password = "wrongpass";
+
+        when(userRepository.findByEmailAndPassword(email, password)).thenReturn(Mono.empty());
+
+        Mono<String> result = userUseCase.authenticate(email, password);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("Credenciales inválidas"))
+                .verify();
+
+        verify(userRepository, times(1)).findByEmailAndPassword(email, password);
     }
 
 }

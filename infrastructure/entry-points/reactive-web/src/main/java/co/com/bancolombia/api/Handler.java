@@ -2,6 +2,8 @@ package co.com.bancolombia.api;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import co.com.bancolombia.api.constants.Constants;
 import co.com.bancolombia.api.constants.messages.ApiResponseMessages;
 import co.com.bancolombia.api.dto.CreateUserDTO;
 import co.com.bancolombia.api.dto.ErrorResponse;
+import co.com.bancolombia.api.dto.LoginUserDTO;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
 import co.com.bancolombia.api.validation.ValidationService;
 import co.com.bancolombia.usecase.user.UserUseCase;
@@ -36,6 +39,32 @@ private static final Logger log = LoggerFactory.getLogger(Handler.class);
                 .then(ServerResponse
                 .status(HttpStatus.CREATED)
                 .build())
+                .onErrorResume(e -> {
+                    ErrorResponse error = new ErrorResponse(
+                            e.getMessage() != null ? e.getMessage() : Constants.UNEXPECTED_ERROR
+                    );
+                    return ServerResponse.status(400).bodyValue(error);
+                });
+    }
+
+    public Mono<ServerResponse> authenticate(ServerRequest serverRequest) {
+        log.trace(ApiResponseMessages.AUTHENTICATE_REQUEST_RECEIVED);
+        return serverRequest.bodyToMono(LoginUserDTO.class)
+                .flatMap(validationService::validate)
+                .flatMap(dto -> 
+                    {
+                        String email = dto.email();
+                        String password = dto.password();
+                        return userUseCase.authenticate(email, password);
+                    }
+                )
+                .doOnSuccess(token -> log.info(ApiResponseMessages.USER_AUTHENTICATED))
+                .flatMap(token -> {
+                    Map<String, String> responseBody = Map.of("token", token);
+                    return ServerResponse
+                        .status(HttpStatus.OK)
+                        .bodyValue(responseBody);
+                    })
                 .onErrorResume(e -> {
                     ErrorResponse error = new ErrorResponse(
                             e.getMessage() != null ? e.getMessage() : Constants.UNEXPECTED_ERROR
