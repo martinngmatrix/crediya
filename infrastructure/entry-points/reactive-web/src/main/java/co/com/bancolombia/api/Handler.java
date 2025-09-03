@@ -2,6 +2,7 @@ package co.com.bancolombia.api;
 
 import lombok.RequiredArgsConstructor;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import co.com.bancolombia.api.dto.ErrorResponse;
 import co.com.bancolombia.api.dto.LoginUserDTO;
 import co.com.bancolombia.api.mapper.UserDTOMapper;
 import co.com.bancolombia.api.validation.ValidationService;
+import co.com.bancolombia.model.user.constants.messages.UserErrorMessages;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import reactor.core.publisher.Mono;
 
@@ -71,5 +73,37 @@ private static final Logger log = LoggerFactory.getLogger(Handler.class);
                     );
                     return ServerResponse.status(400).bodyValue(error);
                 });
+    }
+
+    public Mono<ServerResponse> getUserById(ServerRequest serverRequest) {
+        log.trace(ApiResponseMessages.FIND_BY_ID_REQUEST_RECEIVED);
+        BigInteger id = new BigInteger(serverRequest.pathVariable("id"));
+        return userUseCase.findById(id)
+        .map(userMapper::toFindUserDTO)
+            .flatMap(user -> ServerResponse.ok().bodyValue(user))
+            .onErrorResume(e -> {
+                if (UserErrorMessages.USER_NOT_FOUND.equals(e.getMessage())) {
+                    ErrorResponse error = new ErrorResponse(e.getMessage());
+                    return ServerResponse.status(HttpStatus.NOT_FOUND).bodyValue(error);
+                }
+                ErrorResponse error = new ErrorResponse("Error inesperado");
+                return ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(error);
+            });
+    }
+
+    public Mono<ServerResponse> getUserByDocument(ServerRequest serverRequest) {
+        log.trace(ApiResponseMessages.FIND_BY_DOCUMENT_REQUEST_RECEIVED);
+        String document = serverRequest.queryParam("document").orElse("");
+        return userUseCase.findByDocumentNumber(document)
+            .map(userMapper::toFindUserDTO)
+            .flatMap(user -> ServerResponse.ok().bodyValue(user))
+            .onErrorResume(e -> {
+                if (UserErrorMessages.USER_NOT_FOUND.equals(e.getMessage())) {
+                    ErrorResponse error = new ErrorResponse(e.getMessage());
+                    return ServerResponse.status(HttpStatus.NOT_FOUND).bodyValue(error);
+                }
+                ErrorResponse error = new ErrorResponse("Error inesperado");
+                return ServerResponse.status(HttpStatus.BAD_REQUEST).bodyValue(error);
+            });
     }
 }

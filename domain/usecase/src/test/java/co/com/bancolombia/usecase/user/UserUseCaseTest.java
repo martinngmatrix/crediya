@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,8 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import co.com.bancolombia.model.user.User;
-import co.com.bancolombia.model.user.gateways.JwtService;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.utils.JwtService;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -123,4 +125,67 @@ public class UserUseCaseTest {
         verify(userRepository, times(1)).findByEmailAndPassword(email, password);
     }
 
+    @Test
+    void findByIdShouldReturnUserWhenFound() {
+        BigInteger id = BigInteger.ONE;
+
+        when(userRepository.findById(id)).thenReturn(Mono.just(user));
+
+        Mono<User> result = userUseCase.findById(id);
+
+        StepVerifier.create(result)
+                .expectNext(user)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findById(id);
+    }
+
+    @Test
+    void findByIdShouldThrowExceptionWhenNotFound() {
+        BigInteger id = BigInteger.TEN;
+
+        when(userRepository.findById(id)).thenReturn(Mono.empty());
+
+        Mono<User> result = userUseCase.findById(id);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("Usuario no encontrado"))
+                .verify();
+
+        verify(userRepository, times(1)).findById(id);
+    }
+
+    @Test
+    void findByDocumentNumberShouldReturnUserWhenFound() {
+        String documentNumber = "12345678";
+
+        when(userRepository.findByDocumentNumber(documentNumber)).thenReturn(Mono.just(user));
+
+        Mono<User> result = userUseCase.findByDocumentNumber(documentNumber);
+
+        StepVerifier.create(result)
+                .expectNext(user)
+                .verifyComplete();
+
+        verify(userRepository, times(1)).findByDocumentNumber(documentNumber);
+    }
+
+    @Test
+    void findByDocumentNumberShouldThrowExceptionWhenNotFound() {
+        String documentNumber = "99999999";
+
+        when(userRepository.findByDocumentNumber(documentNumber)).thenReturn(Mono.empty());
+
+        Mono<User> result = userUseCase.findByDocumentNumber(documentNumber);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable ->
+                        throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("Usuario no encontrado"))
+                .verify();
+
+        verify(userRepository, times(1)).findByDocumentNumber(documentNumber);
+    }
 }

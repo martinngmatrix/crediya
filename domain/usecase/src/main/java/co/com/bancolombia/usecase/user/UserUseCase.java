@@ -1,9 +1,11 @@
 package co.com.bancolombia.usecase.user;
 
+import java.math.BigInteger;
+
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.constants.messages.UserErrorMessages;
-import co.com.bancolombia.model.user.gateways.JwtService;
 import co.com.bancolombia.model.user.gateways.UserRepository;
+import co.com.bancolombia.utils.JwtService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -22,5 +24,15 @@ public class UserUseCase {
         return userRepository.findByEmailAndPassword(email, password)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(UserErrorMessages.INVALID_CREDENTIALS)))
                 .map(user -> jwtService.generateToken(user));
+    }
+
+    public Mono<User> findById(BigInteger id) {
+        return userRepository.findById(id)
+            .switchIfEmpty(Mono.error(new IllegalArgumentException(UserErrorMessages.USER_NOT_FOUND)));
+    }
+
+    public Mono<User> findByDocumentNumber(String documentNumber) {
+        return userRepository.findByDocumentNumber(documentNumber)
+            .switchIfEmpty(Mono.error(new IllegalArgumentException(UserErrorMessages.USER_NOT_FOUND)));
     }
 }

@@ -25,7 +25,7 @@ cors:
 adapters.r2dbc:
   host: localhost
   port: 5432
-  database: crediyadb
+  database: crediyadb-authentication
   schema: public
   username: postgres
   password: postgres
