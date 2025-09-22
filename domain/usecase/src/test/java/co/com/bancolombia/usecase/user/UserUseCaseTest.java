@@ -95,7 +95,7 @@ public class UserUseCaseTest {
         String expectedToken = "jwt-token";
 
         when(userRepository.findByEmailAndPassword(email, password)).thenReturn(Mono.just(user));
-        when(jwtService.generateToken(user)).thenReturn(expectedToken);
+        when(jwtService.generateToken(user)).thenReturn(Mono.just(expectedToken)); // <-- CORRECCIÓN
 
         Mono<String> result = userUseCase.authenticate(email, password);
 

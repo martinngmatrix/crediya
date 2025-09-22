@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 
 import co.com.bancolombia.model.user.User;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 public class JwtServiceTest {
 
@@ -17,13 +19,21 @@ public class JwtServiceTest {
         JwtService jwtService = mock(JwtService.class);
         User user = new User();
 
-        when(jwtService.generateToken(user)).thenReturn("mocked-token");
-        when(jwtService.validateToken("mocked-token")).thenReturn(true);
-        when(jwtService.getRoleFromToken("mocked-token")).thenReturn("USER");
+        when(jwtService.generateToken(user)).thenReturn(Mono.just("mocked-token"));
+        when(jwtService.validateToken("mocked-token")).thenReturn(Mono.just(true));
+        when(jwtService.getRoleFromToken("mocked-token")).thenReturn(Mono.just("USER"));
 
-        assertEquals("mocked-token", jwtService.generateToken(user));
-        assertTrue(jwtService.validateToken("mocked-token"));
-        assertEquals("USER", jwtService.getRoleFromToken("mocked-token"));
+        StepVerifier.create(jwtService.generateToken(user))
+                .expectNext("mocked-token")
+                .verifyComplete();
+
+        StepVerifier.create(jwtService.validateToken("mocked-token"))
+                .expectNext(true)
+                .verifyComplete();
+
+        StepVerifier.create(jwtService.getRoleFromToken("mocked-token"))
+                .expectNext("USER")
+                .verifyComplete();
 
         verify(jwtService).generateToken(user);
         verify(jwtService).validateToken("mocked-token");

@@ -23,7 +23,7 @@ public class UserUseCase {
     public Mono<String> authenticate(String email, String password) {
         return userRepository.findByEmailAndPassword(email, password)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException(UserErrorMessages.INVALID_CREDENTIALS)))
-                .map(user -> jwtService.generateToken(user));
+                .flatMap(user -> jwtService.generateToken(user));
     }
 
     public Mono<User> findById(BigInteger id) {
